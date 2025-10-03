@@ -1,0 +1,52 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+model Users{
+userId                        String                  @id                     @default(cuid()) 
+email                         String                                          @unique
+password                      String
+
+createdAt                     DateTime                                        @default(now())
+updatedAt                     DateTime                                        
+}
+
+
+
+model UserCourses{
+userCourseId                  String                  @id                     @default(cuid())
+userId                        String                   
+courseId                      String
+courseName                    String
+
+createdAt                     DateTime                                        @default(now())
+updatedAt                     DateTime  
+}
+
+
+model Courses{
+courseId                      String                  @id                     @default(cuid())
+creatorId                     String                   
+courseName                    String
+description                   String
+language                      String                   
+courseTitles                  String[]
+courseVideos                  String[]
+
+createdAt                     DateTime                                        @default(now())
+updatedAt                     DateTime    
+}
+
+model Session{
+sessionId                     String                  @id                     @default(cuid())    
+userId                        String                  
+
+createdAt                     DateTime                                        @default(now())
+updatedAt                     DateTime       
+}
