@@ -8,19 +8,24 @@ export const login = async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(404).json({
+      return res.status(400).json({
         message: "All feilds required",
       });
     }
 
-    const existingUser = prisma.users.findUnique({
+    const existingUser = await prisma.users.findUnique({
       where: {
         email: email,
+      },
+      select: {
+        userId: true,
+        email: true,
+        password: true,
       },
     });
 
     if (!existingUser) {
-      return res.status(404).json({
+      return res.status(400).json({
         message: "Invalid Credientials",
       });
     }
@@ -28,7 +33,7 @@ export const login = async (req, res) => {
     const passwordMatch = await bcrypt.compare(password, existingUser.password);
 
     if (!passwordMatch) {
-      return res.status(404).json({
+      return res.status(400).json({
         message: "Invalid Credientials",
       });
     }
@@ -46,7 +51,7 @@ export const login = async (req, res) => {
         email: existingUser.email,
         sessionId: session.sessionId,
       },
-      { JWT_SECRET },
+      JWT_SECRET,
       { expiresIn: "7d" }
     );
 
@@ -68,27 +73,25 @@ export const register = async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(404).json({
+      return res.status(400).json({
         message: "All feilds required",
       });
     }
 
-    const existingUser = prisma.users.findUnique({
-      where: {
-        email: email,
-      },
+    const existingUser = await prisma.users.findUnique({
+      where: { email },
     });
 
     if (existingUser) {
-      return res.status(409).json({
-        message: "User Already Exists",
-      });
+      return res.status(409).json({ message: "User already exists" });
     }
+
+    const hashPassword = await bcrypt.hash(password, 10);
 
     const newUser = await prisma.users.create({
       data: {
         email: email,
-        password: password,
+        password: hashPassword,
         updatedAt: new Date(),
       },
     });
@@ -102,16 +105,16 @@ export const register = async (req, res) => {
 
     const jwtToken = jwt.sign(
       {
-        userId: existingUser.userId,
-        email: existingUser.email,
+        userId: newUser.userId,
+        email: newUser.email,
         sessionId: session.sessionId,
       },
-      { JWT_SECRET },
+      JWT_SECRET,
       { expiresIn: "7d" }
     );
 
-    return res.status(200).json({
-      message: "Login Successfull",
+    return res.status(201).json({
+      message: "Registeration Successfull",
       token: jwtToken,
       User: { userId: newUser.userId, email: newUser.email },
     });
