@@ -149,3 +149,19 @@ export const logout = async (req, res) => {
     });
   }
 };
+
+export const getAllCourses = async (req, res) => {
+  try {
+    const courses = await prisma.courses.findMany();
+
+    return res.status(200).json({
+      message: "Success",
+      courses: courses,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Something went wrong",
+      error: error.message,
+    });
+  }
+};

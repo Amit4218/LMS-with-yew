@@ -14,6 +14,7 @@ export const enroll = async (req, res) => {
         courseName: true,
         description: true,
         language: true,
+        thumbnail: true,
       },
     });
 
@@ -23,10 +24,33 @@ export const enroll = async (req, res) => {
       });
     }
 
+    const userCourses = await prisma.userCourses.findFirst({
+      where: {
+        userId: userId,
+      },
+      select: {
+        userCourseId: true,
+      },
+    });
+
+    const alreadyEnrolled = await prisma.userCourses.findUnique({
+      where: {
+        userCourseId: userCourses.userCourseId,
+        userId: userId,
+      },
+    });
+
+    if (alreadyEnrolled) {
+      return res.status(200).json({
+        message: "Already enrolled in the course",
+      });
+    }
+
     await prisma.userCourses.create({
       data: {
         courseId: course.courseId,
         userId: userId,
+        thumbnail: course.thumbnail,
         courseName: course.courseName,
         description: course.description,
         language: course.language,
@@ -69,12 +93,19 @@ export const deEnroll = async (req, res) => {
 export const addCourse = async (req, res) => {
   try {
     const userId = req.user.userId;
-    const { courseName, description, language, courseTitles, courseVideos } =
-      req.body;
+    const {
+      courseName,
+      description,
+      language,
+      courseTitles,
+      courseVideos,
+      thumbnail,
+    } = req.body;
 
     await prisma.courses.create({
       data: {
         creatorId: userId,
+        thumbnail: thumbnail,
         courseName: courseName,
         description: description,
         language: language,
@@ -106,6 +137,7 @@ export const userCourses = async (req, res) => {
       select: {
         courseId: true,
         userCourseId: true,
+        thumbnail: true,
         courseName: true,
         description: true,
         language: true,
@@ -135,6 +167,7 @@ export const getCourse = async (req, res) => {
       select: {
         courseId: true,
         courseName: true,
+        thumbnail: true,
         description: true,
         language: true,
         courseTitles: true,

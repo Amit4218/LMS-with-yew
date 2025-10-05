@@ -15,6 +15,9 @@ CREATE TABLE "UserCourses" (
     "userId" TEXT NOT NULL,
     "courseId" TEXT NOT NULL,
     "courseName" TEXT NOT NULL,
+    "thumbnail" TEXT NOT NULL,
+    "description" TEXT NOT NULL,
+    "language" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -24,8 +27,11 @@ CREATE TABLE "UserCourses" (
 -- CreateTable
 CREATE TABLE "Courses" (
     "courseId" TEXT NOT NULL,
-    "courseName" TEXT NOT NULL,
     "creatorId" TEXT NOT NULL,
+    "courseName" TEXT NOT NULL,
+    "thumbnail" TEXT NOT NULL,
+    "description" TEXT NOT NULL,
+    "language" TEXT NOT NULL,
     "courseTitles" TEXT[],
     "courseVideos" TEXT[],
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,

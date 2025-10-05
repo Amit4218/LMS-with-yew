@@ -24,6 +24,7 @@ userCourseId                  String                  @id                     @d
 userId                        String                   
 courseId                      String
 courseName                    String
+thumbnail                     String
 description                   String
 language                      String
 
@@ -36,6 +37,7 @@ model Courses{
 courseId                      String                  @id                     @default(cuid())
 creatorId                     String                   
 courseName                    String
+thumbnail                     String
 description                   String
 language                      String                   
 courseTitles                  String[]
