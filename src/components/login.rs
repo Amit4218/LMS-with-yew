@@ -1,8 +1,8 @@
-use yew::prelude::*;
-use web_sys::window;
-use gloo_net::http::Request;
-use yew_router::prelude::*;
 use crate::routes::Route;
+use gloo_net::http::Request;
+use web_sys::window;
+use yew::prelude::*;
+use yew_router::prelude::*;
 
 #[function_component(Login)]
 pub fn login() -> Html {
@@ -23,10 +23,13 @@ pub fn login() -> Html {
             wasm_bindgen_futures::spawn_local(async move {
                 let resp = Request::post("http://localhost:5000/api/auth/login")
                     .header("Content-Type", "application/json")
-                    .body(serde_json::json!({
-                        "email": *email,
-                        "password": *password
-                    }).to_string())
+                    .body(
+                        serde_json::json!({
+                            "email": *email,
+                            "password": *password
+                        })
+                        .to_string(),
+                    )
                     .expect("Failed to create request")
                     .send()
                     .await
@@ -35,7 +38,13 @@ pub fn login() -> Html {
                 if resp.ok() {
                     let json: serde_json::Value = resp.json().await.unwrap();
                     if let Some(token) = json["token"].as_str() {
-                        window().unwrap().local_storage().unwrap().unwrap().set_item("token", token).unwrap();
+                        window()
+                            .unwrap()
+                            .local_storage()
+                            .unwrap()
+                            .unwrap()
+                            .set_item("token", token)
+                            .unwrap();
                         navigator.push(&Route::Home);
                     }
                 }
