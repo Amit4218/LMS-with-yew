@@ -10,8 +10,8 @@ pub enum Route {
     UserCourse,
     #[at("/course/:id")]
     CourseDetail { id: String },
-    // #[at("/add-course")]
-    // AddCourse,
+    #[at("/add-course")]
+    AddCourse,
     // #[not_found],
     // NotFound,
     #[at("/")]

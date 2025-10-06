@@ -1,14 +1,14 @@
-use yew::prelude::*;
-use yew_router::prelude::*;
 use gloo_net::http::Request;
 use serde::Deserialize;
 use wasm_bindgen_futures::spawn_local;
 use web_sys::console;
+use yew::prelude::*;
+use yew_router::prelude::*;
 
 use crate::routes::Route;
 
-// ⚠️ Temporary token — only for testing
-const TOKEN: &str = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWdkbjdlcjkwMDAwb3lhZmwxeXVoZ2FyIiwiZW1haWwiOiJ0ZXN0QGdtYWlsLmNvbSIsInNlc3Npb25JZCI6ImNtZ2RyamgyMzAwMDBveTdkbXhlazlhcXEiLCJpYXQiOjE3NTk2NzI0NDUsImV4cCI6MTc2MDI3NzI0NX0.y6ESvU8pRaFmWlSwxemNHkYpfWwtA_fSYioz2GWqeHE";
+const TOKEN: &str = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWdkbjdlcjkwMDAwb3lhZmwxeXVoZ2FyIiwiZW1haWwiOiJ0ZXN0QGdtYWlsLmNvbSIsInNlc3Npb25JZCI6ImNtZ2ZtYnhjMjAwMDFveTZvMmRiazg5c3AiLCJpYXQiOjE3NTk3ODQ2MjgsImV4cCI6MTc2MDM4OTQyOH0.96Cd8VbBZ8gjNpsfYH6P3GJpGUZaWHnCsZ2bYYlQCJ8";
+
 
 #[derive(Clone, Deserialize, PartialEq, Debug)]
 struct Course {
@@ -60,9 +60,7 @@ pub fn home() -> Html {
                                 console::log_1(&"Failed to parse courses".into());
                             }
                         }
-                        Err(e) => console::log_1(
-                            &format!("Failed to parse JSON: {:?}", e).into(),
-                        ),
+                        Err(e) => console::log_1(&format!("Failed to parse JSON: {:?}", e).into()),
                     },
                     Err(e) => console::log_1(&format!("Request failed: {:?}", e).into()),
                 }
@@ -79,7 +77,7 @@ pub fn home() -> Html {
             let course_id = course.course_id.clone();
             spawn_local(async move {
                 enroll(course_id.clone()).await;
-                navigator.push(&Route::CourseDetail { id: course_id });
+                navigator.push(&Route::UserCourse);
             });
         })
     };

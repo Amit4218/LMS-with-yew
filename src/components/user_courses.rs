@@ -1,26 +1,32 @@
-use yew::prelude::*;
-use yew_router::prelude::*;
 use gloo_net::http::Request;
 use serde::Deserialize;
 use wasm_bindgen_futures::spawn_local;
 use web_sys::console;
+use yew::prelude::*;
+use yew_router::prelude::*;
 
-const TOKEN: &str = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWdkbjdlcjkwMDAwb3lhZmwxeXVoZ2FyIiwiZW1haWwiOiJ0ZXN0QGdtYWlsLmNvbSIsInNlc3Npb25JZCI6ImNtZ2RyamgyMzAwMDBveTdkbXhlazlhcXEiLCJpYXQiOjE3NTk2NzI0NDUsImV4cCI6MTc2MDI3NzI0NX0.y6ESvU8pRaFmWlSwxemNHkYpfWwtA_fSYioz2GWqeHE";
-
+use crate::routes::Route;
 
 #[derive(Clone, Deserialize, PartialEq, Debug)]
-struct UserCourses {
+pub struct UserCourses {
     #[serde(rename = "userCourseId")]
-    user_course_id: String,
+    pub user_course_id: String,
     #[serde(rename = "courseId")]
-    course_id: String,
+    pub course_id: String,
     #[serde(rename = "courseName")]
-    course_name: String,
-    thumbnail: String,
-    description: String,
-    language: String,
+    pub course_name: String,
+    pub thumbnail: String,
+    pub description: String,
+    pub language: String,
 }
 
+#[derive(Deserialize, Debug)]
+struct UserCoursesResponse {
+    #[serde(rename = "Courses")] // Fix here
+    courses: Vec<UserCourses>,
+}
+
+const TOKEN: &str = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWdkbjdlcjkwMDAwb3lhZmwxeXVoZ2FyIiwiZW1haWwiOiJ0ZXN0QGdtYWlsLmNvbSIsInNlc3Npb25JZCI6ImNtZ2ZtYnhjMjAwMDFveTZvMmRiazg5c3AiLCJpYXQiOjE3NTk3ODQ2MjgsImV4cCI6MTc2MDM4OTQyOH0.96Cd8VbBZ8gjNpsfYH6P3GJpGUZaWHnCsZ2bYYlQCJ8";
 
 #[function_component(UserCourse)]
 pub fn user_courses() -> Html {
@@ -31,54 +37,69 @@ pub fn user_courses() -> Html {
         let courses_for_effect = courses.clone();
 
         use_effect_with((), move |_| {
-            let courses = courses_for_effect.clone(); 
+            let courses = courses_for_effect.clone();
+
             spawn_local(async move {
                 match Request::get("http://localhost:5000/api/user/user-courses")
-                    .header("Authorization", TOKEN) 
+                    .header("Authorization", TOKEN)
                     .send()
                     .await
                 {
-                    Ok(resp) => match resp.json::<serde_json::Value>().await {
-                        Ok(json) => {
-                            if let Ok(parsed) =
-                                serde_json::from_value::<Vec<UserCourses>>(json["Courses"].clone())
-                            {
-                                courses.set(parsed);
-                            } else {
-                                console::log_1(&"Failed to parse courses".into());
-                            }
+                    Ok(resp) => match resp.json::<UserCoursesResponse>().await {
+                        Ok(parsed) => {
+                            console::log_1(&format!("Parsed courses: {:?}", parsed).into());
+                            courses.set(parsed.courses);
                         }
-                        Err(e) => console::log_1(
-                            &format!("Failed to parse JSON: {:?}", e).into(),
-                        ),
+                        Err(e) => console::log_1(&format!("Failed to parse JSON: {:?}", e).into()),
                     },
                     Err(e) => console::log_1(&format!("Request failed: {:?}", e).into()),
                 }
             });
+
             || ()
         });
     }
 
     html! {
         <div class="p-4">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                { for courses.iter().map(|course| {
+            <h1 class="text-2xl font-bold mb-4">{"My Courses"}</h1>
+
+            {
+                if courses.is_empty() {
                     html! {
-                        <div class="bg-white p-4 rounded shadow cursor-pointer hover:shadow-md transition-shadow duration-200">
-                            <img
-                                class="rounded mb-3"
-                                width="500"
-                                height="500"
-                                src={course.thumbnail.clone()}
-                                alt={course.course_name.clone()}
-                            />
-                            <h2 class="font-bold text-xl mb-2">{ &course.course_name }</h2>
-                            <p class="text-gray-600">{ &course.description }</p>
-                            <p class="mt-2 text-sm text-gray-400">{ &course.language }</p>
+                        <p class="text-gray-500">{"Loading your courses..."}</p>
+                    }
+                } else {
+                    html! {
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            { for courses.iter().map(|course| {
+                                let navigator = navigator.clone();
+                                let course_id = course.course_id.clone();
+
+                                html! {
+                                    <div
+                                        onclick={Callback::from(move |_| {
+                                            navigator.push(&Route::CourseDetail { id: course_id.clone() });
+                                        })}
+                                        class="bg-white p-4 rounded shadow cursor-pointer hover:shadow-md transition-shadow duration-200"
+                                    >
+                                        <img
+                                            class="rounded mb-3 w-full object-cover"
+                                            width="500"
+                                            height="500"
+                                            src={course.thumbnail.clone()}
+                                            alt={course.course_name.clone()}
+                                        />
+                                        <h2 class="font-bold text-xl mb-2">{ &course.course_name }</h2>
+                                        <p class="text-gray-600 line-clamp-3">{ &course.description }</p>
+                                        <p class="mt-2 text-sm text-gray-400 italic">{ &course.language }</p>
+                                    </div>
+                                }
+                            })}
                         </div>
                     }
-                })}
-            </div>
+                }
+            }
         </div>
     }
 }
