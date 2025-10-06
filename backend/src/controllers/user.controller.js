@@ -5,10 +5,9 @@ export const enroll = async (req, res) => {
     const courseId = req.params.courseId;
     const userId = req.user.userId;
 
+    // Check if course exists
     const course = await prisma.courses.findUnique({
-      where: {
-        courseId: courseId,
-      },
+      where: { courseId },
       select: {
         courseId: true,
         courseName: true,
@@ -19,33 +18,21 @@ export const enroll = async (req, res) => {
     });
 
     if (!course) {
-      return res.status(404).json({
-        message: "Course Dosen't Exists",
-      });
+      return res.status(404).json({ message: "Course Doesn't Exist" });
     }
 
-    const userCourses = await prisma.userCourses.findFirst({
-      where: {
-        userId: userId,
-      },
-      select: {
-        userCourseId: true,
-      },
-    });
-
-    const alreadyEnrolled = await prisma.userCourses.findUnique({
-      where: {
-        userCourseId: userCourses.userCourseId,
-        userId: userId,
-      },
+    // Check if user is already enrolled in this course
+    const alreadyEnrolled = await prisma.userCourses.findFirst({
+      where: { userId, courseId },
     });
 
     if (alreadyEnrolled) {
-      return res.status(200).json({
-        message: "Already enrolled in the course",
-      });
+      return res
+        .status(200)
+        .json({ message: "Already enrolled in the course" });
     }
 
+    // Enroll the user
     await prisma.userCourses.create({
       data: {
         courseId: course.courseId,
@@ -58,9 +45,7 @@ export const enroll = async (req, res) => {
       },
     });
 
-    return res.status(200).json({
-      message: "Enrolled Successfully",
-    });
+    return res.status(200).json({ message: "Enrolled Successfully" });
   } catch (error) {
     return res.status(500).json({
       message: "Something Went Wrong",
