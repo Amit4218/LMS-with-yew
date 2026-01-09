@@ -7,7 +7,7 @@ use yew_router::prelude::*;
 
 use crate::routes::Route;
 
-const TOKEN: &str = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWdkbjdlcjkwMDAwb3lhZmwxeXVoZ2FyIiwiZW1haWwiOiJ0ZXN0QGdtYWlsLmNvbSIsInNlc3Npb25JZCI6ImNtZ2ZtYnhjMjAwMDFveTZvMmRiazg5c3AiLCJpYXQiOjE3NTk3ODQ2MjgsImV4cCI6MTc2MDM4OTQyOH0.96Cd8VbBZ8gjNpsfYH6P3GJpGUZaWHnCsZ2bYYlQCJ8";
+const TOKEN: &str = "";
 
 
 #[derive(Clone, Deserialize, PartialEq, Debug)]
